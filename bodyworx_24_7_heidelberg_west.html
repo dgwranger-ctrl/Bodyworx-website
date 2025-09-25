@@ -1,0 +1,537 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { Check, Clock, MapPin, Phone, Mail, Dumbbell, Shield, Users, ChevronDown, Star, ArrowRight, TimerReset, Salad } from "lucide-react";
+
+/**
+ * Bodyworx 24/7 — Heidelberg West
+ * Single‑file, production‑ready React landing site built with TailwindCSS.
+ * - Modern, bold, motivating design
+ * - Clear pricing with promos
+ * - Conversion‑first CTAs
+ * - Local SEO sections + JSON‑LD
+ * - Mobile‑first, accessible, fast
+ *
+ * How to use:
+ * 1) Drop this component into your React app (Tailwind required).
+ * 2) Replace placeholders (phone, email, images, map link) with real details.
+ * 3) Hook CTAs to your join/checkout and scheduler links.
+ */
+
+// ---------- Config (edit here) ----------
+const GYM = {
+  name: "Bodyworx Gym 24/7",
+  suburb: "Heidelberg West",
+  address: "123 Example Rd, Heidelberg West VIC 3081",
+  phone: "+61 3 9000 0000",
+  email: "hello@bodyworx247.com.au",
+  googleMapUrl: "https://maps.app.goo.gl/",
+  heroImage: "https://images.unsplash.com/photo-1517832606299-7ae9b720a186?q=80&w=2000&auto=format&fit=crop", // replace
+  gallery: [
+    "https://images.unsplash.com/photo-1556817411-31ae72fa3ea0?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1517963628607-235ccdd5476c?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1546483875-ad9014c88eba?q=80&w=1600&auto=format&fit=crop",
+  ],
+  open24: true,
+  promos: {
+    freeTrial: true,
+    freeTrialDays: 7,
+    badge: "From $9.50/week",
+    altBadge: "Under $10/week",
+    // Optional headline per brief. Edit text to suit a live promo if required.
+    headlinePromo: "Special: as low as $9.50/week",
+    // If you insist on "less than $1/day" messaging, place it here so it's easy to change site‑wide.
+    // Verify in real pricing before going live.
+    perDayTagline: "Less than $1 per day*", // ← review before publishing
+    disclaimer: "*Promotional examples only. Confirm current pricing and terms at signup.",
+  },
+  pricing: [
+    {
+      name: "Gym Only",
+      priceWeekly: 9.5,
+      description: "24/7 access. All equipment. No lock‑in.",
+      bullets: [
+        "Warehouse‑style gym, all levels",
+        "Anytime entry via secure access",
+        "Cancel anytime"
+      ],
+      cta: "Join Now",
+      highlight: true,
+    },
+    {
+      name: "Group Training",
+      priceWeekly: 24,
+      description: "Boot camps, boxing, strength & conditioning.",
+      bullets: [
+        "Unlimited classes schedule",
+        "Coach‑led sessions",
+        "Beginner‑friendly options",
+      ],
+      cta: "See Class Schedule",
+      highlight: false,
+    },
+    {
+      name: "Personal Training",
+      priceWeekly: 0,
+      priceNote: "From $49/session",
+      description: "1:1 coaching tailored to your goals.",
+      bullets: [
+        "Custom programs",
+        "Form checks & accountability",
+        "Nutrition guidance add‑on",
+      ],
+      cta: "Book a Consult",
+      highlight: false,
+    },
+  ],
+  testimonials: [
+    {
+      name: "Mia R.",
+      text: "Best value in the north. Friendly trainers, no egos, real results.",
+    },
+    {
+      name: "Jason K.",
+      text: "Open 24/7 means no excuses. The community vibe keeps me consistent.",
+    },
+    {
+      name: "Amara T.",
+      text: "Boot camps are killer in the best way. I’m stronger and leaner in 8 weeks.",
+    },
+  ],
+};
+
+// ---------- Utility ----------
+const currency = (n) => new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 2 }).format(n);
+
+// Smooth scroll for internal anchors
+const useSmoothScroll = () => {
+  useEffect(() => {
+    const handler = (e) => {
+      const a = e.target.closest('a[href^="#"]');
+      if (!a) return;
+      const id = a.getAttribute('href');
+      const el = document.querySelector(id);
+      if (!el) return;
+      e.preventDefault();
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, []);
+};
+
+export default function BodyworxSite() {
+  useSmoothScroll();
+  const [faqOpen, setFaqOpen] = useState(null);
+
+  // JSON‑LD for LocalBusiness
+  const jsonLd = useMemo(() => ({
+    "@context": "https://schema.org",
+    "@type": "HealthClub",
+    name: GYM.name,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: GYM.address,
+      addressLocality: "Heidelberg West",
+      addressRegion: "VIC",
+      postalCode: "3081",
+      addressCountry: "AU"
+    },
+    email: GYM.email,
+    telephone: GYM.phone,
+    openingHours: GYM.open24 ? "Mo-Su 00:00-23:59" : "",
+    url: "https://www.bodyworx247.example",
+    image: [GYM.heroImage, ...GYM.gallery],
+    priceRange: "$"
+  }), []);
+
+  return (
+    <div className="min-h-screen bg-zinc-950 text-white">
+      {/* Headless <head> injections for SEO when possible */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+
+      <Hero />
+      <Nav />
+      <USPStrip />
+      <PromoRibbon />
+      <Pricing />
+      <GroupTraining />
+      <PersonalTraining />
+      <Community />
+      <Gallery />
+      <FAQ faqOpen={faqOpen} setFaqOpen={setFaqOpen} />
+      <Contact />
+      <Footer />
+    </div>
+  );
+}
+
+// ---------- Sections ----------
+function Hero() {
+  return (
+    <header id="home" className="relative isolate">
+      <div className="absolute inset-0 -z-10">
+        <img src={GYM.heroImage} alt="Bodyworx gym hero" className="h-full w-full object-cover opacity-35" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-zinc-950" />
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-28 pb-20">
+        <div className="flex flex-col gap-6 max-w-3xl">
+          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 ring-1 ring-emerald-400/30 px-3 py-1 text-emerald-300 text-xs">
+            <Clock className="h-3.5 w-3.5" /> Open 24/7 · {GYM.suburb}
+          </div>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight tracking-tight">
+            Train anytime. Pay less. <span className="text-emerald-400">Get results.</span>
+          </h1>
+          <p className="text-zinc-300 text-lg md:text-xl">
+            {GYM.name} is a locally owned, warehouse‑style gym with a friendly, no‑ego community. Real value, real support, real change.
+          </p>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <a href="#join" className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 font-semibold text-zinc-950 hover:bg-emerald-400 transition">
+              Join Now <ArrowRight className="h-4 w-4" />
+            </a>
+            <a href="#trial" className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-5 py-3 font-semibold hover:bg-white/20 transition">
+              Start Free Trial
+            </a>
+            <a href="#schedule" className="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-5 py-3 font-semibold hover:bg-white/15 transition">
+              See Our Schedule
+            </a>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-400">
+            <div className="inline-flex items-center gap-2"><Shield className="h-4 w-4 text-emerald-400"/> Secure access</div>
+            <div className="inline-flex items-center gap-2"><Users className="h-4 w-4 text-emerald-400"/> Community vibe</div>
+            <div className="inline-flex items-center gap-2"><Dumbbell className="h-4 w-4 text-emerald-400"/> Strength & conditioning</div>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function Nav() {
+  const links = [
+    { href: "#home", label: "Home" },
+    { href: "#pricing", label: "Memberships" },
+    { href: "#group", label: "Group Training" },
+    { href: "#community", label: "Community" },
+    { href: "#faq", label: "FAQ" },
+    { href: "#contact", label: "Contact" },
+  ];
+  return (
+    <div className="sticky top-0 z-40 backdrop-blur bg-zinc-950/70 border-b border-white/5">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+        <a href="#home" className="font-bold tracking-tight text-white">Bodyworx <span className="text-emerald-400">24/7</span></a>
+        <nav className="hidden md:flex items-center gap-6 text-sm">
+          {links.map((l) => (
+            <a key={l.href} href={l.href} className="text-zinc-300 hover:text-white transition">{l.label}</a>
+          ))}
+        </nav>
+        <div className="flex items-center gap-3">
+          <a href="#join" className="hidden sm:inline-flex rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-emerald-400 transition">Join Now</a>
+          <a href="tel:+61390000000" aria-label="Call Bodyworx" className="p-2 rounded-xl bg-white/5 hover:bg-white/10"><Phone className="h-4 w-4"/></a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function USPStrip() {
+  return (
+    <section className="border-y border-white/5 bg-zinc-900/40">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { icon: <Clock className="h-5 w-5"/>, title: "Open 24/7", text: "Train on your schedule." },
+          { icon: <Shield className="h-5 w-5"/>, title: "No lock‑ins", text: "Cancel anytime plans." },
+          { icon: <Users className="h-5 w-5"/>, title: "Community", text: "Supportive, friendly vibe." },
+          { icon: <Dumbbell className="h-5 w-5"/>, title: "Results", text: "Programs that actually work." },
+        ].map((u, i) => (
+          <div key={i} className="flex items-start gap-3">
+            <div className="mt-1 text-emerald-400">{u.icon}</div>
+            <div>
+              <div className="font-semibold">{u.title}</div>
+              <div className="text-sm text-zinc-400">{u.text}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function PromoRibbon() {
+  return (
+    <section id="trial" className="bg-emerald-500 text-zinc-950">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-3 text-sm md:text-base font-semibold">
+          <TimerReset className="h-5 w-5"/>
+          <span>{GYM.promos.freeTrial ? `${GYM.promos.freeTrialDays}-Day Free Trial` : GYM.promos.headlinePromo}</span>
+          <span className="hidden md:inline">·</span>
+          <span className="rounded-full bg-zinc-900 text-white px-3 py-1 text-xs md:text-sm">{GYM.promos.badge}</span>
+          <span className="hidden sm:inline">·</span>
+          <span className="text-zinc-900/80 text-xs md:text-sm">{GYM.promos.perDayTagline}</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <a href="#join" className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 text-white px-4 py-2 font-semibold hover:bg-zinc-800 transition">Start Now <ArrowRight className="h-4 w-4"/></a>
+          <a href="#pricing" className="inline-flex items-center gap-2 rounded-xl bg-white text-zinc-900 px-4 py-2 font-semibold hover:bg-zinc-200 transition">See Pricing</a>
+        </div>
+      </div>
+      <p className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-3 text-xs text-zinc-900/80">{GYM.promos.disclaimer}</p>
+    </section>
+  );
+}
+
+function Pricing() {
+  return (
+    <section id="pricing" className="relative py-20 bg-gradient-to-b from-zinc-950 via-zinc-900/30 to-zinc-950">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mb-10">
+          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Memberships & Pricing</h2>
+          <p className="text-zinc-400 mt-2">Affordable memberships with flexible options. Highlighting: Heidelberg West gym, 24/7 access, and boot camp packages.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6" id="join">
+          {GYM.pricing.map((tier, i) => (
+            <div key={i} className={`rounded-3xl border ${tier.highlight ? 'border-emerald-400' : 'border-white/10'} bg-zinc-900/50 p-6 flex flex-col`}>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold">{tier.name}</h3>
+                  {tier.highlight && (
+                    <span className="text-xs rounded-full bg-emerald-500/15 text-emerald-300 px-3 py-1">Best Value</span>
+                  )}
+                </div>
+                <div className="mt-4">
+                  {tier.priceWeekly > 0 ? (
+                    <div className="text-3xl font-extrabold">{currency(tier.priceWeekly)}/wk</div>
+                  ) : (
+                    <div className="text-3xl font-extrabold">{tier.priceNote}</div>
+                  )}
+                  <p className="text-zinc-400 mt-2 text-sm">{tier.description}</p>
+                </div>
+                <ul className="mt-4 space-y-2 text-sm">
+                  {tier.bullets.map((b, j) => (
+                    <li key={j} className="flex items-start gap-2 text-zinc-300"><Check className="h-4 w-4 text-emerald-400 mt-0.5"/>{b}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="mt-6">
+                <a href="#contact" className={`w-full inline-flex justify-center items-center gap-2 rounded-xl px-4 py-2 font-semibold transition ${tier.highlight ? 'bg-emerald-500 text-zinc-950 hover:bg-emerald-400' : 'bg-white/10 hover:bg-white/20'}`}>
+                  {tier.cta} <ArrowRight className="h-4 w-4"/>
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <p className="mt-6 text-xs text-zinc-500">No hidden fees. Student and family discounts may apply. Ask us in‑club.</p>
+      </div>
+    </section>
+  );
+}
+
+function GroupTraining() {
+  return (
+    <section id="group" className="py-20 border-t border-white/5">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-10 items-center">
+        <div>
+          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Group Training that pushes you forward</h2>
+          <p className="text-zinc-400 mt-3">Boot Camps, Boxing, and Strength & Conditioning classes in Heidelberg West. Coach‑led sessions for all fitness levels.</p>
+          <ul className="mt-4 space-y-2 text-sm">
+            {[
+              "Unlimited classes on flexible packages",
+              "Beginner‑friendly options with progressions",
+              "Accountability from real humans (not just apps)",
+            ].map((b, i) => (
+              <li key={i} className="flex items-start gap-2 text-zinc-300"><Check className="h-4 w-4 text-emerald-400 mt-0.5"/>{b}</li>
+            ))}
+          </ul>
+
+          <div id="schedule" className="mt-6 flex flex-wrap gap-3">
+            <a href="#contact" className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 text-zinc-950 px-5 py-3 font-semibold hover:bg-emerald-400 transition">See Our Schedule <ArrowRight className="h-4 w-4"/></a>
+            <a href="#join" className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-5 py-3 font-semibold hover:bg-white/20 transition">Join Now</a>
+          </div>
+          <p className="text-xs text-zinc-500 mt-3">Prefer mornings? Late nights? Classes run across the week so you can train around work and family.</p>
+        </div>
+
+        <div className="rounded-3xl overflow-hidden border border-white/10">
+          <img src={GYM.gallery[0]} alt="Group training at Bodyworx" className="w-full h-80 object-cover"/>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PersonalTraining() {
+  return (
+    <section className="py-20 border-t border-white/5 bg-zinc-900/30">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-10 items-center">
+        <div className="rounded-3xl overflow-hidden border border-white/10 order-2 md:order-1">
+          <img src={GYM.gallery[1]} alt="Personal training at Bodyworx" className="w-full h-80 object-cover"/>
+        </div>
+        <div className="order-1 md:order-2">
+          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Personal Training that respects your budget</h2>
+          <p className="text-zinc-400 mt-3">Work 1:1 with a Bodyworx coach. Get a tailored plan, technique coaching, and nutrition guidance so you stop guessing and start progressing.</p>
+          <ul className="mt-4 space-y-2 text-sm">
+            {[
+              "Goal mapping and periodised programming",
+              "Form checks every session",
+              "Simple nutrition add‑ons that fit your lifestyle",
+            ].map((b, i) => (
+              <li key={i} className="flex items-start gap-2 text-zinc-300"><Check className="h-4 w-4 text-emerald-400 mt-0.5"/>{b}</li>
+            ))}
+          </ul>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a href="#contact" className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 text-zinc-950 px-5 py-3 font-semibold hover:bg-emerald-400 transition">Book a Consult <ArrowRight className="h-4 w-4"/></a>
+            <a href="#pricing" className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-5 py-3 font-semibold hover:bg-white/20 transition">See Pricing</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Community() {
+  return (
+    <section id="community" className="py-20 border-t border-white/5">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mb-10">
+          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">A Heidelberg West community that trains hard and looks out for each other</h2>
+          <p className="text-zinc-400 mt-3">Locally owned. Friendly trainers. Supportive members. It’s the no‑ego gym where you can actually stick to it.</p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {GYM.testimonials.map((t, i) => (
+            <div key={i} className="rounded-3xl border border-white/10 bg-zinc-900/40 p-6">
+              <div className="flex items-center gap-1 text-emerald-400 mb-2">
+                {Array.from({ length: 5 }).map((_, j) => <Star key={j} className="h-4 w-4" />)}
+              </div>
+              <p className="text-zinc-200">“{t.text}”</p>
+              <div className="mt-4 text-sm text-zinc-400">— {t.name}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-10 rounded-3xl border border-white/10 bg-emerald-500/10 p-6">
+          <h3 className="font-bold text-emerald-300">Member wins</h3>
+          <p className="text-zinc-300 text-sm mt-1">Fat‑loss milestones, first pull‑ups, PB deadlifts, and brand‑new routines that finally stick. Send us your story and we’ll feature it here.</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Gallery() {
+  return (
+    <section className="py-16 border-t border-white/5 bg-zinc-900/20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex items-end justify-between mb-6">
+          <h2 className="text-2xl font-extrabold tracking-tight">Inside the gym</h2>
+          <a href="#contact" className="text-sm text-emerald-400 hover:text-emerald-300">Book a walk‑through →</a>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {GYM.gallery.map((src, i) => (
+            <img key={i} src={src} alt={`Bodyworx gym photo ${i+1}`} className="h-40 md:h-48 w-full object-cover rounded-2xl border border-white/10"/>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FAQ({ faqOpen, setFaqOpen }) {
+  const faqs = [
+    { q: "How much is membership?", a: "Gym‑only from $9.50 per week. Group Training from $24 per week. Personal Training from $49 per session. No lock‑ins on selected plans." },
+    { q: "Can I cancel anytime?", a: "Yes. On flexible plans you can cancel anytime. We keep it simple and fair." },
+    { q: "Are you really open 24/7?", a: "Yes. Secure access means you can train any hour of any day." },
+    { q: "Do you offer nutrition support?", a: "Basic guidance is included with many PT packages. Ask your coach about add‑ons." },
+    { q: "Where are you located?", a: `We’re in ${GYM.suburb}. See map below for directions and parking.` },
+  ];
+
+  return (
+    <section id="faq" className="py-20 border-t border-white/5">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-10 items-start">
+        <div>
+          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Questions, answered</h2>
+          <p className="text-zinc-400 mt-3">Everything you need to know about memberships, classes, and getting started.</p>
+          <a href="#join" className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 text-zinc-950 px-5 py-3 font-semibold hover:bg-emerald-400 transition mt-6">Start Free Trial <ArrowRight className="h-4 w-4"/></a>
+        </div>
+        <div className="space-y-3">
+          {faqs.map((f, i) => (
+            <div key={i} className="rounded-2xl border border-white/10 bg-zinc-900/40">
+              <button onClick={() => setFaqOpen(faqOpen === i ? null : i)} className="w-full flex items-center justify-between px-4 py-4 text-left">
+                <span className="font-semibold">{f.q}</span>
+                <ChevronDown className={`h-5 w-5 transition ${faqOpen === i ? 'rotate-180' : ''}`}/>
+              </button>
+              {faqOpen === i && (
+                <div className="px-4 pb-4 text-zinc-400 text-sm">{f.a}</div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Contact() {
+  return (
+    <section id="contact" className="py-20 border-t border-white/5 bg-zinc-900/30">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid md:grid-cols-2 gap-10">
+          <div>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Contact & Location</h2>
+            <p className="text-zinc-400 mt-3">We’re your local Heidelberg West 24/7 gym. Pop in, message us, or call and we’ll get you set up in minutes.</p>
+
+            <div className="mt-6 space-y-3 text-sm">
+              <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-emerald-400"/> {GYM.address}</div>
+              <a href={`tel:${GYM.phone}`} className="flex items-center gap-2 text-zinc-300 hover:text-white"><Phone className="h-4 w-4 text-emerald-400"/> {GYM.phone}</a>
+              <a href={`mailto:${GYM.email}`} className="flex items-center gap-2 text-zinc-300 hover:text-white"><Mail className="h-4 w-4 text-emerald-400"/> {GYM.email}</a>
+            </div>
+
+            <form onSubmit={(e)=>e.preventDefault()} className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input className="bg-zinc-800/80 border border-white/10 rounded-xl px-4 py-3" placeholder="Name" required />
+              <input className="bg-zinc-800/80 border border-white/10 rounded-xl px-4 py-3" type="email" placeholder="Email" required />
+              <input className="sm:col-span-2 bg-zinc-800/80 border border-white/10 rounded-xl px-4 py-3" placeholder="Phone" />
+              <textarea className="sm:col-span-2 bg-zinc-800/80 border border-white/10 rounded-xl px-4 py-3" rows={4} placeholder="Tell us your goals (fat loss, strength, confidence)…" />
+              <button className="sm:col-span-2 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 text-zinc-950 px-5 py-3 font-semibold hover:bg-emerald-400 transition">Send Message <ArrowRight className="h-4 w-4"/></button>
+            </form>
+          </div>
+          <div className="rounded-3xl overflow-hidden border border-white/10">
+            <iframe
+              title="Bodyworx on Google Maps"
+              src={GYM.googleMapUrl}
+              className="w-full h-96"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+        </div>
+
+        <div className="mt-10 text-xs text-zinc-500">SEO targets: Heidelberg West Gym, 24/7 Gym Heidelberg, Affordable Gym Memberships, Boot Camp Heidelberg, Boxing Classes Heidelberg, Strength & Conditioning Heidelberg West.</div>
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="border-t border-white/5">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 text-sm text-zinc-400 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div className="font-semibold text-white">Bodyworx 24/7 — Heidelberg West</div>
+          <div>{GYM.address}</div>
+          <div>Open 24/7</div>
+        </div>
+        <div className="flex items-center gap-3">
+          <a href="#pricing" className="rounded-xl bg-white/10 px-4 py-2 text-white hover:bg-white/20">Memberships</a>
+          <a href="#group" className="rounded-xl bg-white/10 px-4 py-2 text-white hover:bg-white/20">Group Training</a>
+          <a href="#contact" className="rounded-xl bg-emerald-500 text-zinc-950 px-4 py-2 font-semibold hover:bg-emerald-400">Start Free Trial</a>
+        </div>
+      </div>
+      <div className="text-center text-xs text-zinc-500 pb-6">
+        © {new Date().getFullYear()} Bodyworx Gym 24/7. All rights reserved.
+      </div>
+    </footer>
+  );
+}
